@@ -420,7 +420,7 @@ public:
       // passed to the parallel_for function). For all other cases,
       // emit a warning and ignore.
       if (auto *A = FD->getAttr<SYCLIntelKernelArgsRestrictAttr>()) {
-        if (ParentFD == SYCLKernel) {
+        if (ParentFD == SYCLKernel && A->isImplicit()) {
           Attrs.insert(A);
         } else {
           SemaRef.Diag(A->getLocation(), diag::warn_attribute_ignored) << A;
@@ -428,7 +428,7 @@ public:
         }
       }
       if (auto *A = FD->getAttr<SYCLIntelNumSimdWorkItemsAttr>()) {
-        if (ParentFD == SYCLKernel) {
+        if (ParentFD == SYCLKernel && A->isImplicit()) {
           Attrs.insert(A);
         } else {
           SemaRef.Diag(A->getLocation(), diag::warn_attribute_ignored) << A;
@@ -436,7 +436,7 @@ public:
         }
       }
       if (auto *A = FD->getAttr<SYCLIntelMaxWorkGroupSizeAttr>()) {
-        if (ParentFD == SYCLKernel) {
+        if (ParentFD == SYCLKernel && A->isImplicit()) {
           Attrs.insert(A);
         } else {
           SemaRef.Diag(A->getLocation(), diag::warn_attribute_ignored) << A;
@@ -444,7 +444,7 @@ public:
         }
       }
       if (auto *A = FD->getAttr<SYCLIntelMaxGlobalWorkDimAttr>()) {
-        if (ParentFD == SYCLKernel) {
+        if (ParentFD == SYCLKernel && A->isImplicit()) {
           Attrs.insert(A);
         } else {
           SemaRef.Diag(A->getLocation(), diag::warn_attribute_ignored) << A;
@@ -452,7 +452,7 @@ public:
         }
       }
       if (auto *A = FD->getAttr<SYCLIntelNoGlobalWorkOffsetAttr>()) {
-        if (ParentFD == SYCLKernel) {
+        if (ParentFD == SYCLKernel && A->isImplicit()) {
           Attrs.insert(A);
         } else {
           SemaRef.Diag(A->getLocation(), diag::warn_attribute_ignored) << A;
@@ -1677,7 +1677,9 @@ void Sema::MarkDevice(void) {
         case attr::Kind::SYCLIntelMaxGlobalWorkDim:
         case attr::Kind::SYCLIntelMaxWorkGroupSize:
         case attr::Kind::SYCLIntelNoGlobalWorkOffset: {
-          SYCLKernel->addAttr(A);
+          Attr *NewA = A->clone(getASTContext());
+          NewA->setImplicit(true);
+          SYCLKernel->addAttr(NewA);
           break;
         }
         // TODO: vec_len_hint should be handled here
