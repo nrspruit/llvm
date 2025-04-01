@@ -1117,8 +1117,7 @@ ur_result_t urEventReleaseInternal(ur_event_handle_t Event) {
   }
   if (Event->OwnNativeHandle) {
     if (DisableEventsCaching) {
-      if (!Event->IsInteropNativeHandle ||
-          (Event->IsInteropNativeHandle && checkL0LoaderTeardown())) {
+      if (checkL0LoaderTeardown()) {
         auto ZeResult = ZE_CALL_NOCHECK(zeEventDestroy, (Event->ZeEvent));
         // Gracefully handle the case that L0 was already unloaded.
         if (ZeResult && ZeResult != ZE_RESULT_ERROR_UNINITIALIZED)
